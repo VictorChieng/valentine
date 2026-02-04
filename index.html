@@ -248,14 +248,10 @@
     handleMove(e.clientX, e.clientY);
   });
 
-  zone.addEventListener("pointerdown", e => {
-    handleMove(e.clientX, e.clientY);
-  });
-
   noBtn.onclick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    return false;
+    moveNo(e.clientX, e.clientY);
   };
 
   yesBtn.onclick = () => {
