@@ -1,434 +1,610 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Secure Access</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Will you be my Valentine?</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-        }
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-        .container {
-            width: 100%;
-            max-width: 400px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            position: relative;
-        }
+  <style>
+    :root {
+      --bg1: #ffd6e7;
+      --bg2: #ffeef6;
+      --card: #ffffffee;
+      --yes: #ff3b7a;
+    }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
+    * { box-sizing: border-box; }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      padding: 16px;
+    }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-        .content {
-            padding: 30px;
-        }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      padding: 22px 18px;
+      background: var(--card);
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,.15);
+      transition: opacity 0.5s ease;
+    }
 
-        .input-group {
-            margin-bottom: 25px;
-        }
+    .art {
+      width: 200px;
+      max-width: 70vw;
+      margin: 0 auto 6px;
+      display: block;
+    }
 
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
+    h1 {
+      font-size: clamp(22px, 6vw, 32px);
+      margin: 10px 0 18px;
+    }
 
-        .password-container {
-            position: relative;
-            width: 100%;
-        }
+    .button-zone {
+      position: relative;
+      width: 100%;
+      height: 140px;
+      margin-top: 10px;
+      touch-action: none;
+    }
 
-        .password-input {
-            width: 100%;
-            height: 52px;
-            padding: 0 50px 0 20px;
-            font-size: 16px !important; /* Critical for iOS */
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-            font-family: monospace;
-            letter-spacing: 2px;
-            font-size: 18px;
-        }
+    button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 16px 28px;
+      font-size: 18px;
+      font-weight: 800;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        .password-input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+    #yesBtn {
+      left: 12%;
+      background: var(--yes);
+      color: #fff;
+    }
 
-        .password-input::placeholder {
-            letter-spacing: normal;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            opacity: 0.5;
-        }
+    #noBtn {
+      left: 60%;
+      background: #e5e7eb;
+      color: #111827;
+      z-index: 10;
+    }
 
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 8px;
-            user-select: none;
-        }
+    .hint {
+      margin-top: 8px;
+      font-size: 13px;
+      opacity: .7;
+    }
 
-        .submit-btn {
-            width: 100%;
-            height: 52px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+    .result {
+      display: none;
+      margin-top: 16px;
+      animation: pop .35s ease;
+    }
 
-        .submit-btn:hover, .submit-btn:active {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
+    .result h2 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
 
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+    .fireworks {
+      width: 100%;
+      max-width: 260px;
+      border-radius: 18px;
+      box-shadow: 0 14px 35px rgba(0,0,0,.25);
+      display: block;
+      margin: auto;
+      object-fit: cover;
+    }
 
-        .submit-btn.loading .spinner {
-            display: inline-block;
-        }
+    @keyframes pop {
+      from { transform: scale(.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
 
-        .spinner {
-            display: none;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    /* Password Overlay Styles */
+    #passwordOverlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
 
-        .mobile-hint {
-            text-align: center;
-            margin-top: 15px;
-            color: #666;
-            font-size: 13px;
-            display: none;
-        }
+    .password-card {
+      width: 100%;
+      max-width: 320px;
+      padding: 25px 20px;
+      background: var(--card);
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,.15);
+      animation: pop .35s ease;
+    }
 
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 10px;
-            padding: 10px;
-            background: #fff5f5;
-            border-radius: 8px;
-            border-left: 4px solid #dc3545;
-            display: none;
-        }
+    .password-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid #ffb8d9;
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      background: #fff9fc;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
 
-        .success-message {
-            color: #28a745;
-            font-size: 14px;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f8fff9;
-            border-radius: 8px;
-            border-left: 4px solid #28a745;
-            display: none;
-        }
+    .password-input:focus {
+      outline: none;
+      border-color: #ff3b7a;
+      box-shadow: 0 0 0 3px rgba(255, 59, 122, 0.1);
+    }
 
-        /* Mobile specific styles */
-        @media (max-width: 768px) {
-            body {
-                padding: 15px;
-                padding-bottom: calc(15px + env(safe-area-inset-bottom));
-                background: white;
-            }
+    .password-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #ff3b7a, #ff6b9d);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: transform 0.2s;
+      box-shadow: 0 6px 20px rgba(255, 59, 122, 0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
 
-            .container {
-                max-width: 100%;
-                border-radius: 16px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                min-height: auto;
-            }
+    .password-submit:active {
+      transform: scale(0.98);
+    }
 
-            .header {
-                padding: 25px 20px;
-            }
+    .password-error {
+      background: #fff0f5;
+      border: 1px solid #ff3b7a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 16px;
+      display: none;
+      animation: pop 0.3s ease;
+    }
 
-            .content {
-                padding: 25px 20px;
-            }
-
-            .password-input {
-                height: 56px; /* Larger touch target for mobile */
-            }
-
-            .submit-btn {
-                height: 56px;
-                font-size: 17px; /* Slightly larger font for mobile */
-            }
-
-            .mobile-hint {
-                display: block;
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            .content {
-                background: #1a1a1a;
-            }
-
-            .password-input {
-                background: #2d2d2d;
-                border-color: #404040;
-                color: white;
-            }
-
-            .password-input:focus {
-                border-color: #667eea;
-                background: #333;
-            }
-
-            .input-group label {
-                color: #e0e0e0;
-            }
-        }
-    </style>
+    .extra-hint {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #ff3b7a;
+      display: none;
+      animation: pop 0.3s ease;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔒 Secure Access</h1>
-            <p>Enter password to continue</p>
-        </div>
-        
-        <div class="content">
-            <form id="loginForm" action="/submit" method="POST">
-                <div class="input-group">
-                    <label for="password">Password</label>
-                    <div class="password-container">
-                        <input 
-                            type="password" 
-                            id="password"
-                            name="password"
-                            class="password-input"
-                            placeholder="Enter your password"
-                            required
-                            autocomplete="current-password"
-                            enterkeyhint="go"
-                            inputmode="text"
-                            autocapitalize="none"
-                            autocorrect="off"
-                            spellcheck="false"
-                        >
-                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
-                            👁️
-                        </button>
-                    </div>
-                    <p class="mobile-hint">Press Enter key or tap "Continue" button</p>
-                </div>
+<canvas id="confettiCanvas"></canvas>
 
-                <div class="error-message" id="errorMessage">
-                    Invalid password. Please try again.
-                </div>
-
-                <div class="success-message" id="successMessage">
-                    Access granted! Redirecting...
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span>Continue</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
-        </div>
+<!-- Password Overlay -->
+<div id="passwordOverlay">
+  <div class="password-card">
+    <svg width="80" height="80" viewBox="0 0 24 24" style="margin: 0 auto 16px;">
+      <path fill="#ff3b7a" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+    
+    <h2 style="margin-bottom: 8px;">💖 Secret Message for You 💖</h2>
+    <p style="margin-bottom: 20px; opacity: 0.8; font-size: 15px;">
+      Enter our special code to continue:
+    </p>
+    
+    <div style="position: relative; margin-bottom: 20px;">
+      <input type="text" 
+             id="passwordInput" 
+             maxlength="6"
+             class="password-input"
+             placeholder="Enter code..."
+             autocomplete="off"
+             autocapitalize="none"
+             autocorrect="off"
+             spellcheck="false"
+             autofocus>
     </div>
+    
+    <button id="submitPassword" class="password-submit">
+      Open My Heart 💕
+    </button>
+    
+    <div id="passwordError" class="password-error">
+      <p style="margin: 0; color: #ff3b7a; font-size: 14px; text-align: center;">
+        <span style="font-size: 18px;">❌</span><br>
+        Not quite right! Try again.<br>
+        <small style="opacity: 0.7; margin-top: 5px; display: block;">
+          💡 Hint: A number that means "you and me forever"
+        </small>
+      </p>
+    </div>
+    
+    <div id="extraHint" class="extra-hint">
+      <p style="margin: 0; font-size: 13px; opacity: 0.8; text-align: center;">
+        Still stuck? Try: <strong>love</strong> or <strong>yes</strong> or <strong>1009</strong>
+      </p>
+    </div>
+  </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('loginForm');
-            const passwordInput = document.getElementById('password');
-            const togglePasswordBtn = document.getElementById('togglePassword');
-            const submitBtn = document.getElementById('submitBtn');
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
-            let isPasswordVisible = false;
+<main class="card">
 
-            // Toggle password visibility
-            togglePasswordBtn.addEventListener('click', function() {
-                isPasswordVisible = !isPasswordVisible;
-                passwordInput.type = isPasswordVisible ? 'text' : 'password';
-                togglePasswordBtn.textContent = isPasswordVisible ? '🙈' : '👁️';
-                togglePasswordBtn.setAttribute('aria-label', 
-                    isPasswordVisible ? 'Hide password' : 'Show password');
-                
-                // Focus back on input after toggle
-                passwordInput.focus();
-            });
+  <!-- Cute Animal -->
+  <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="fur" x1="0" x2="1">
+        <stop offset="0" stop-color="#f7c7a1"/>
+        <stop offset="1" stop-color="#f2a97b"/>
+      </linearGradient>
+      <linearGradient id="heart" x1="0" x2="1">
+        <stop offset="0" stop-color="#ff4d7d"/>
+        <stop offset="1" stop-color="#ff1f68"/>
+      </linearGradient>
+    </defs>
 
-            // Handle Enter key on mobile keyboards
-            passwordInput.addEventListener('keydown', function(e) {
-                // Check if Enter/Return key is pressed
-                if (e.key === 'Enter' || e.keyCode === 13) {
-                    e.preventDefault(); // Prevent default form submission
-                    
-                    // Check if form is valid
-                    if (form.checkValidity()) {
-                        submitForm();
-                    } else {
-                        // Show error if empty
-                        showError("Please enter a password");
-                        passwordInput.focus();
-                    }
-                }
-            });
+    <path d="M250 50 C250 33 270 25 282 38
+             C294 25 314 33 314 50
+             C314 78 282 92 282 106
+             C282 92 250 78 250 50Z"
+          fill="url(#heart)"/>
 
-            // Form submission handler
-            form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-                if (form.checkValidity()) {
-                    submitForm();
-                }
-            });
+    <path d="M90 120 C90 70 140 40 190 60
+             C240 40 290 70 290 120
+             C290 180 240 210 190 210
+             C140 210 90 180 90 120Z"
+          fill="url(#fur)"/>
 
-            // Clear error when user starts typing
-            passwordInput.addEventListener('input', function() {
-                hideError();
-                hideSuccess();
-            });
+    <circle cx="160" cy="130" r="8"/>
+    <circle cx="220" cy="130" r="8"/>
+  </svg>
 
-            // Submit form function
-            function submitForm() {
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.classList.add('loading');
-                
-                // Simulate form submission (replace with actual API call)
-                setTimeout(function() {
-                    // For demo purposes, let's check if password is "demo123"
-                    const password = passwordInput.value;
-                    
-                    if (password === "1009") {
-                        showSuccess("Access granted! Redirecting...");
-                        
-                        // Simulate redirect after 1.5 seconds
-                        setTimeout(function() {
-                            // Replace this with actual redirect
-                            console.log("Redirecting to dashboard...");
-                            // window.location.href = "/dashboard";
-                        }, 1500);
-                    } else {
-                        showError("Incorrect password. Please try again.");
-                        
-                        // Reset form state
-                        submitBtn.disabled = false;
-                        submitBtn.classList.remove('loading');
-                        
-                        // Clear password field for security
-                        passwordInput.value = "";
-                        passwordInput.focus();
-                    }
-                }, 1500); // Simulate network delay
-            }
+  <h1>Chia Hui Ying, will you be my Valentine? 💖</h1>
 
-            // Show error message
-            function showError(message) {
-                errorMessage.textContent = message;
-                errorMessage.style.display = 'block';
-                successMessage.style.display = 'none';
-                
-                // Auto-hide error after 5 seconds
-                setTimeout(hideError, 5000);
-            }
+  <section class="button-zone" id="zone">
+    <button id="yesBtn">Yes 💕</button>
+    <button id="noBtn">No 😶</button>
+  </section>
 
-            // Show success message
-            function showSuccess(message) {
-                successMessage.textContent = message;
-                successMessage.style.display = 'block';
-                errorMessage.style.display = 'none';
-            }
+  <div class="hint" id="hint">The "No" button is feeling shy 🙈</div>
 
-            // Hide error message
-            function hideError() {
-                errorMessage.style.display = 'none';
-            }
+  <section class="result" id="result">
+    <h2>YAY!! 🎉💘</h2>
 
-            // Hide success message
-            function hideSuccess() {
-                successMessage.style.display = 'none';
-            }
+    <!-- 🔥 Live Photo video -->
+    <video class="fireworks"
+      src="menu.mp4"
+      autoplay
+      loop
+      muted
+      playsinline>
+    </video>
+  </section>
 
-            // Focus password input on load for better UX
-            setTimeout(function() {
-                passwordInput.focus();
-            }, 300);
+</main>
 
-            // Prevent accidental form submission on mobile when tapping outside
-            document.addEventListener('touchstart', function(e) {
-                if (e.target === passwordInput) {
-                    // User tapped on password field, ensure keyboard opens
-                    passwordInput.focus();
-                }
-            }, { passive: true });
-        });
-    </script>
+<script>
+  // ============================================
+  // PASSWORD PROTECTION
+  // ============================================
+  
+  // DOM Elements
+  const passwordOverlay = document.getElementById('passwordOverlay');
+  const passwordInput = document.getElementById('passwordInput');
+  const submitPassword = document.getElementById('submitPassword');
+  const passwordError = document.getElementById('passwordError');
+  const extraHint = document.getElementById('extraHint');
+  const mainCard = document.querySelector('.card');
+  
+  let wrongAttempts = 0;
+  
+  // ============================================
+  // INITIAL SETUP
+  // ============================================
+  function initializePasswordProtection() {
+    // Hide main content initially
+    mainCard.style.opacity = '0.3';
+    mainCard.style.pointerEvents = 'none';
+    
+    // Check if already unlocked
+    if (sessionStorage.getItem('valentineUnlocked') === 'true') {
+      passwordOverlay.style.display = 'none';
+      mainCard.style.opacity = '1';
+      mainCard.style.pointerEvents = 'auto';
+      return;
+    }
+    
+    // Focus on input after a short delay
+    setTimeout(() => {
+      passwordInput.focus();
+    }, 500);
+  }
+  
+  // ============================================
+  // OBFUSCATED PASSWORD CHECK
+  // ============================================
+  function isPasswordCorrect(input) {
+    const cleanInput = input.toLowerCase().trim();
+    
+    // Multiple obfuscated ways to check for 1009
+    const encodedPass = atob("MTAwOQ=="); // Base64 for "1009"
+    const mathPass = (1000 + 9).toString();
+    const arrayPass = ['10', '0', '9'].join('');
+    const charCodePass = String.fromCharCode(49, 48, 48, 57);
+    
+    // Check all possible correct inputs
+    if (cleanInput === "1009" ||
+        cleanInput === encodedPass ||
+        cleanInput === mathPass ||
+        cleanInput === arrayPass ||
+        cleanInput === charCodePass ||
+        cleanInput === "love" ||
+        cleanInput === "yes" ||
+        cleanInput === "forever") {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // ============================================
+  // UNLOCK PAGE FUNCTION
+  // ============================================
+  function unlockPage() {
+    // Store unlocked state
+    sessionStorage.setItem('valentineUnlocked', 'true');
+    
+    // Small confetti for success
+    if (window.confetti) {
+      confettiInstance({
+        particleCount: 100,
+        spread: 70,
+        origin: { x: 0.5, y: 0.5 }
+      });
+    }
+    
+    // Hide password overlay with fade
+    passwordOverlay.style.opacity = '0';
+    passwordOverlay.style.transition = 'opacity 0.5s ease';
+    
+    // Show main content
+    mainCard.style.opacity = '1';
+    mainCard.style.pointerEvents = 'auto';
+    mainCard.style.transition = 'opacity 0.5s ease 0.3s';
+    
+    // Remove overlay after animation
+    setTimeout(() => {
+      passwordOverlay.style.display = 'none';
+      
+      // Re-focus on page for accessibility
+      mainCard.focus();
+    }, 800);
+  }
+  
+  // ============================================
+  // PASSWORD EVENT HANDLERS
+  // ============================================
+  function checkPassword() {
+    const userInput = passwordInput.value;
+    
+    if (isPasswordCorrect(userInput)) {
+      unlockPage();
+    } else {
+      wrongAttempts++;
+      
+      // Show error
+      passwordError.style.display = 'block';
+      passwordInput.style.borderColor = '#ff3b7a';
+      passwordInput.style.boxShadow = '0 0 0 3px rgba(255, 59, 122, 0.1)';
+      
+      // Shake animation
+      passwordInput.style.animation = 'none';
+      setTimeout(() => {
+        passwordInput.style.animation = 'shake 0.5s';
+      }, 10);
+      
+      // Clear input
+      passwordInput.value = '';
+      passwordInput.focus();
+      
+      // Show extra hint after 2 wrong attempts
+      if (wrongAttempts >= 2) {
+        extraHint.style.display = 'block';
+      }
+      
+      // Show partial hint after 3 wrong attempts
+      if (wrongAttempts >= 3) {
+        passwordInput.placeholder = "1 0 0 _";
+      }
+    }
+  }
+  
+  // ============================================
+  // MOBILE-FRIENDLY EVENT LISTENERS
+  // ============================================
+  
+  // Handle button click
+  submitPassword.addEventListener('click', checkPassword);
+  submitPassword.addEventListener('touchend', function(e) {
+    e.preventDefault(); // Prevent double tap zoom on mobile
+    checkPassword();
+  });
+  
+  // Handle Enter key
+  passwordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      checkPassword();
+    }
+  });
+  
+  // Handle virtual keyboard on mobile
+  passwordInput.addEventListener('input', function(e) {
+    // Auto-submit when 4 characters are entered (for "1009")
+    if (this.value.length === 4) {
+      // Small delay to allow user to see what they typed
+      setTimeout(() => {
+        checkPassword();
+      }, 300);
+    }
+  });
+  
+  // ============================================
+  // ORIGINAL VALENTINE PAGE CODE
+  // ============================================
+  const zone = document.getElementById("zone");
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const result = document.getElementById("result");
+  const hint = document.getElementById("hint");
+  const confettiCanvas = document.getElementById("confettiCanvas");
+
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    confettiCanvas.width = innerWidth * dpr;
+    confettiCanvas.height = innerHeight * dpr;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const confettiInstance = confetti.create(confettiCanvas, { useWorker: true });
+
+  function celebrate() {
+    confettiInstance({
+      particleCount: 300,
+      spread: 160,
+      startVelocity: 55,
+      origin: { x: 0.5, y: 0.6 }
+    });
+  }
+
+  let scale = 1;
+  function growYes() {
+    scale = Math.min(2.2, scale + 0.12);
+    yesBtn.style.transform = `translateY(-50%) scale(${scale})`;
+  }
+
+  function moveNo(x, y) {
+    const z = zone.getBoundingClientRect();
+    const b = noBtn.getBoundingClientRect();
+
+    let dx = (b.left + b.width / 2) - x;
+    let dy = (b.top + b.height / 2) - y;
+    let mag = Math.hypot(dx, dy) || 1;
+
+    let left = (b.left - z.left) + (dx / mag) * 120;
+    let top  = (b.top - z.top) + (dy / mag) * 120;
+
+    noBtn.style.left = Math.max(0, Math.min(z.width - b.width, left)) + "px";
+    noBtn.style.top  = Math.max(0, Math.min(z.height - b.height, top)) + "px";
+
+    growYes();
+  }
+
+  function handleMove(x, y) {
+    const b = noBtn.getBoundingClientRect();
+    const d = Math.hypot(
+      (b.left + b.width / 2) - x,
+      (b.top + b.height / 2) - y
+    );
+    if (d < 140) moveNo(x, y);
+  }
+
+  // Mobile touch support for the "No" button
+  zone.addEventListener("pointermove", e => {
+    handleMove(e.clientX, e.clientY);
+  });
+  
+  // Touch events for mobile
+  zone.addEventListener("touchmove", e => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    handleMove(touch.clientX, touch.clientY);
+  }, { passive: false });
+
+  noBtn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    moveNo(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+  };
+  
+  // Touch event for mobile
+  noBtn.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    moveNo(touch.clientX, touch.clientY);
+  });
+
+  yesBtn.onclick = () => {
+    zone.style.display = "none";
+    hint.style.display = "none";
+    result.style.display = "block";
+    celebrate();
+  };
+  
+  // Touch event for mobile
+  yesBtn.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    zone.style.display = "none";
+    hint.style.display = "none";
+    result.style.display = "block";
+    celebrate();
+  });
+  
+  // ============================================
+  // INITIALIZE EVERYTHING
+  // ============================================
+  window.addEventListener('DOMContentLoaded', initializePasswordProtection);
+  
+  // Handle page visibility changes (for mobile)
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && sessionStorage.getItem('valentineUnlocked') !== 'true') {
+      passwordInput.focus();
+    }
+  });
+</script>
+
 </body>
 </html>
-
