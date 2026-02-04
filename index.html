@@ -13,7 +13,6 @@
       --bg2: #ffeef6;
       --card: #ffffffee;
       --yes: #ff3b7a;
-      --yesHover: #ff1f68;
     }
 
     * { box-sizing: border-box; }
@@ -107,14 +106,17 @@
 
     .result h2 {
       font-size: 32px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .fireworks {
       width: 100%;
-      max-width: 300px;
-      margin: auto;
+      max-width: 260px;
+      border-radius: 18px;
+      box-shadow: 0 14px 35px rgba(0,0,0,.25);
       display: block;
+      margin: auto;
+      object-fit: cover;
     }
 
     @keyframes pop {
@@ -169,8 +171,15 @@
 
   <section class="result" id="result">
     <h2>YAY!! 🎉💘</h2>
-    <img class="fireworks"
-      src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" />
+
+    <!-- 🔥 Live Photo video -->
+    <video class="fireworks"
+      src="live.mp4"
+      autoplay
+      loop
+      muted
+      playsinline>
+    </video>
   </section>
 
 </main>
@@ -225,13 +234,21 @@
     growYes();
   }
 
-  zone.addEventListener("pointermove", e => {
+  function handleMove(x, y) {
     const b = noBtn.getBoundingClientRect();
     const d = Math.hypot(
-      (b.left + b.width / 2) - e.clientX,
-      (b.top + b.height / 2) - e.clientY
+      (b.left + b.width / 2) - x,
+      (b.top + b.height / 2) - y
     );
-    if (d < 120) moveNo(e.clientX, e.clientY);
+    if (d < 140) moveNo(x, y);
+  }
+
+  zone.addEventListener("pointermove", e => {
+    handleMove(e.clientX, e.clientY);
+  });
+
+  zone.addEventListener("pointerdown", e => {
+    handleMove(e.clientX, e.clientY);
   });
 
   yesBtn.onclick = () => {
@@ -241,5 +258,6 @@
     celebrate();
   };
 </script>
+
 </body>
 </html>
