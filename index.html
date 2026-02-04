@@ -1,303 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Will you be my Valentine?</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Will you be my Valentine?</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-  <style>
-    :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
-      --card: #ffffffee;
-      --yes: #ff3b7a;
-    }
+<style>
+:root {
+  --bg1: #ffd6e7;
+  --bg2: #ffeef6;
+  --card: #ffffffee;
+  --yes: #ff3b7a;
+}
 
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow: hidden;
-      padding: 16px;
-    }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  padding: 16px;
+}
 
-    #confettiCanvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-    }
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
 
-    .card {
-      width: 100%;
-      max-width: 420px;
-      padding: 22px 18px;
-      background: var(--card);
-      border-radius: 24px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,.15);
-      transition: opacity 0.5s ease;
-    }
+/* ================= PASSWORD OVERLAY ================= */
 
-    .art {
-      width: 200px;
-      max-width: 70vw;
-      margin: 0 auto 6px;
-      display: block;
-    }
+#passwordOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: env(safe-area-inset-top)
+           env(safe-area-inset-right)
+           env(safe-area-inset-bottom)
+           env(safe-area-inset-left);
+}
 
-    h1 {
-      font-size: clamp(22px, 6vw, 32px);
-      margin: 10px 0 18px;
-    }
+.password-card {
+  width: 100%;
+  max-width: 320px;
+  background: var(--card);
+  border-radius: 24px;
+  padding: 22px 18px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,.15);
+  animation: pop .35s ease;
+}
 
-    .button-zone {
-      position: relative;
-      width: 100%;
-      height: 140px;
-      margin-top: 10px;
-      touch-action: none;
-    }
+.password-input {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 12px;
+  border: 2px solid #ffb8d9;
+  background: #fff9fc;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
 
-    button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 16px 28px;
-      font-size: 18px;
-      font-weight: 800;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.14);
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+.password-input:focus {
+  outline: none;
+  border-color: #ff3b7a;
+  box-shadow: 0 0 0 3px rgba(255,59,122,.15);
+}
 
-    #yesBtn {
-      left: 12%;
-      background: var(--yes);
-      color: #fff;
-    }
+.password-submit {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  padding: 14px;
+  background: linear-gradient(135deg,#ff3b7a,#ff6b9d);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 6px 18px rgba(255,59,122,.3);
+}
 
-    #noBtn {
-      left: 60%;
-      background: #e5e7eb;
-      color: #111827;
-      z-index: 10;
-    }
+.password-error {
+  display: none;
+  margin-top: 12px;
+  background: #fff0f5;
+  border: 1px solid #ff3b7a;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  color: #ff3b7a;
+}
 
-    .hint {
-      margin-top: 8px;
-      font-size: 13px;
-      opacity: .7;
-    }
+/* ================= MAIN CARD ================= */
 
-    .result {
-      display: none;
-      margin-top: 16px;
-      animation: pop .35s ease;
-    }
+.card {
+  width: 100%;
+  max-width: 420px;
+  padding: 22px 18px;
+  background: var(--card);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,.15);
+  opacity: .3;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
 
-    .result h2 {
-      font-size: 32px;
-      margin-bottom: 12px;
-    }
+.art {
+  width: 200px;
+  max-width: 70vw;
+  margin: auto;
+}
 
-    .fireworks {
-      width: 100%;
-      max-width: 260px;
-      border-radius: 18px;
-      box-shadow: 0 14px 35px rgba(0,0,0,.25);
-      display: block;
-      margin: auto;
-      object-fit: cover;
-    }
+h1 {
+  font-size: clamp(22px, 6vw, 32px);
+}
 
-    @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+.button-zone {
+  position: relative;
+  height: 140px;
+  margin-top: 12px;
+}
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-8px); }
-      75% { transform: translateX(8px); }
-    }
+button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 16px 28px;
+  font-size: 18px;
+  font-weight: 800;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
 
-    /* Password Overlay Styles */
-    #passwordOverlay {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      padding: 20px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+#yesBtn {
+  left: 12%;
+  background: var(--yes);
+  color: #fff;
+}
 
-    .password-card {
-      width: 100%;
-      max-width: 320px;
-      padding: 25px 20px;
-      background: var(--card);
-      border-radius: 24px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,.15);
-      animation: pop .35s ease;
-    }
+#noBtn {
+  left: 60%;
+  background: #e5e7eb;
+}
 
-    .password-input {
-      width: 100%;
-      padding: 16px;
-      border: 2px solid #ffb8d9;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-      background: #fff9fc;
-      box-sizing: border-box;
-      margin-bottom: 15px;
-      transition: all 0.3s ease;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-    }
+.result { display: none; }
 
-    .password-input:focus {
-      outline: none;
-      border-color: #ff3b7a;
-      box-shadow: 0 0 0 3px rgba(255, 59, 122, 0.1);
-    }
+/* ================= ANIMATIONS ================= */
 
-    .password-submit {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #ff3b7a, #ff6b9d);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, opacity 0.2s;
-      box-shadow: 0 4px 15px rgba(255, 59, 122, 0.3);
-      -webkit-tap-highlight-color: transparent;
-      margin: 0 auto;
-      display: block;
-    }
+@keyframes pop {
+  from { transform: scale(.95); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
 
-    .password-submit:active {
-      transform: scale(0.98);
-      opacity: 0.9;
-    }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
 
-    .password-error {
-      background: #fff0f5;
-      border: 1px solid #ff3b7a;
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-      display: none;
-      animation: pop 0.3s ease;
-    }
-
-    .extra-hint {
-      margin-top: 15px;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #ff3b7a;
-      display: none;
-      animation: pop 0.3s ease;
-    }
-  </style>
+@media (max-height: 700px) {
+  .password-card { padding: 18px 16px; }
+  .password-submit { padding: 12px; font-size: 15px; }
+}
+</style>
 </head>
 
 <body>
+
 <canvas id="confettiCanvas"></canvas>
 
-<!-- Password Overlay -->
+<!-- PASSWORD OVERLAY -->
 <div id="passwordOverlay">
   <div class="password-card">
-    <svg width="80" height="80" viewBox="0 0 24 24" style="margin: 0 auto 16px;">
-      <path fill="#ff3b7a" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-    </svg>
-    
-    <h2 style="margin-bottom: 8px; font-size: 24px;">💖 Secret Message 💖</h2>
-    <p style="margin-bottom: 15px; opacity: 0.8; font-size: 15px; line-height: 1.4;">
-      This message is just for you<br>
-      Enter the special code to continue
-    </p>
-    
-    <div style="position: relative; margin-bottom: 15px;">
-      <input type="text" 
-             id="passwordInput" 
-             class="password-input"
-             placeholder="Enter password..."
-             autocomplete="off"
-             autocapitalize="none"
-             autocorrect="off"
-             spellcheck="false"
-             autofocus>
-    </div>
-    
+    <h2>💖 Secret Message 💖</h2>
+    <p style="opacity:.8">Enter the special code</p>
+
+    <input id="passwordInput" class="password-input"
+      placeholder="Enter password"
+      autocomplete="off" autocorrect="off" spellcheck="false" />
+
     <button id="submitPassword" class="password-submit">
       Unlock the Message 🔓
     </button>
-    
+
     <div id="passwordError" class="password-error">
-      <p style="margin: 0; color: #ff3b7a; font-size: 14px; text-align: center;">
-        <span style="font-size: 18px;">❌</span><br>
-        That's not the right code<br>
-        <small style="opacity: 0.7; margin-top: 5px; display: block;">
-          💡 Hint: It's the number I use the most on my phone
-        </small>
-      </p>
+      ❌ Wrong code<br><small>Hint: starts with 10</small>
     </div>
   </div>
 </div>
 
+<!-- MAIN CONTENT -->
 <main class="card">
-
-  <!-- Cute Animal -->
-  <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="fur" x1="0" x2="1">
-        <stop offset="0" stop-color="#f7c7a1"/>
-        <stop offset="1" stop-color="#f2a97b"/>
-      </linearGradient>
-      <linearGradient id="heart" x1="0" x2="1">
-        <stop offset="0" stop-color="#ff4d7d"/>
-        <stop offset="1" stop-color="#ff1f68"/>
-      </linearGradient>
-    </defs>
-
-    <path d="M250 50 C250 33 270 25 282 38
-             C294 25 314 33 314 50
-             C314 78 282 92 282 106
-             C282 92 250 78 250 50Z"
-          fill="url(#heart)"/>
-
-    <path d="M90 120 C90 70 140 40 190 60
-             C240 40 290 70 290 120
-             C290 180 240 210 190 210
-             C140 210 90 180 90 120Z"
-          fill="url(#fur)"/>
-
-    <circle cx="160" cy="130" r="8"/>
-    <circle cx="220" cy="130" r="8"/>
-  </svg>
-
   <h1>Chia Hui Ying, will you be my Valentine? 💖</h1>
 
   <section class="button-zone" id="zone">
@@ -305,289 +220,39 @@
     <button id="noBtn">No 😶</button>
   </section>
 
-  <div class="hint" id="hint">The "No" button is feeling shy 🙈</div>
-
   <section class="result" id="result">
     <h2>YAY!! 🎉💘</h2>
-
-    <!-- 🔥 Live Photo video -->
-    <video class="fireworks"
-      src="menu.mp4"
-      autoplay
-      loop
-      muted
-      playsinline>
-    </video>
   </section>
-
 </main>
 
 <script>
-  // ============================================
-  // PASSWORD PROTECTION
-  // ============================================
-  
-  // DOM Elements
-  const passwordOverlay = document.getElementById('passwordOverlay');
-  const passwordInput = document.getElementById('passwordInput');
-  const submitPassword = document.getElementById('submitPassword');
-  const passwordError = document.getElementById('passwordError');
-  const mainCard = document.querySelector('.card');
-  
-  let wrongAttempts = 0;
-  
-  // ============================================
-  // INITIAL SETUP
-  // ============================================
-  function initializePasswordProtection() {
-    // Hide main content initially
-    mainCard.style.opacity = '0.3';
-    mainCard.style.pointerEvents = 'none';
-    
-    // Check if already unlocked
-    if (sessionStorage.getItem('valentineUnlocked') === 'true') {
-      passwordOverlay.style.display = 'none';
-      mainCard.style.opacity = '1';
-      mainCard.style.pointerEvents = 'auto';
-      return;
-    }
-    
-    // Show password overlay
-    passwordOverlay.style.display = 'flex';
-    
-    // Focus on input after a short delay
-    setTimeout(() => {
-      passwordInput.focus();
-    }, 300);
+const overlay = document.getElementById('passwordOverlay');
+const input = document.getElementById('passwordInput');
+const error = document.getElementById('passwordError');
+const card = document.querySelector('.card');
+
+function unlock() {
+  overlay.style.opacity = '0';
+  setTimeout(() => overlay.style.display = 'none', 400);
+  card.style.opacity = '1';
+  card.style.pointerEvents = 'auto';
+  sessionStorage.setItem('valentineUnlocked','true');
+}
+
+document.getElementById('submitPassword').onclick = () => {
+  if (["1009","10-09","10/09"].includes(input.value.trim())) {
+    unlock();
+  } else {
+    error.style.display = 'block';
+    input.value = '';
+    input.style.animation = 'shake .4s';
+    setTimeout(() => input.style.animation = '', 400);
   }
-  
-  // ============================================
-  // PASSWORD CHECK FUNCTION
-  // ============================================
-  function isPasswordCorrect(input) {
-    const cleanInput = input.trim();
-    
-    // Accept multiple formats of the same number
-    if (cleanInput === "1009" || 
-        cleanInput === "10-09" || 
-        cleanInput === "10/09" ||
-        cleanInput === "1009❤️" ||
-        cleanInput === "10.09") {
-      return true;
-    }
-    
-    return false;
-  }
-  
-  // ============================================
-  // UNLOCK PAGE FUNCTION
-  // ============================================
-  function unlockPage() {
-    // Store unlocked state
-    sessionStorage.setItem('valentineUnlocked', 'true');
-    
-    // Small confetti for success
-    if (window.confetti) {
-      confettiInstance({
-        particleCount: 80,
-        spread: 60,
-        origin: { x: 0.5, y: 0.5 }
-      });
-    }
-    
-    // Hide password overlay with fade
-    passwordOverlay.style.opacity = '0';
-    passwordOverlay.style.transition = 'opacity 0.5s ease';
-    
-    // Show main content
-    mainCard.style.opacity = '1';
-    mainCard.style.pointerEvents = 'auto';
-    mainCard.style.transition = 'opacity 0.5s ease 0.3s';
-    
-    // Remove overlay after animation
-    setTimeout(() => {
-      passwordOverlay.style.display = 'none';
-    }, 500);
-  }
-  
-  // ============================================
-  // PASSWORD SUBMIT FUNCTION
-  // ============================================
-  function checkPassword() {
-    const userInput = passwordInput.value;
-    
-    if (isPasswordCorrect(userInput)) {
-      unlockPage();
-    } else {
-      wrongAttempts++;
-      
-      // Show error
-      passwordError.style.display = 'block';
-      passwordInput.style.borderColor = '#ff3b7a';
-      passwordInput.style.boxShadow = '0 0 0 3px rgba(255, 59, 122, 0.1)';
-      
-      // Shake animation
-      passwordInput.style.animation = 'none';
-      setTimeout(() => {
-        passwordInput.style.animation = 'shake 0.5s';
-      }, 10);
-      
-      // Clear input and refocus
-      passwordInput.value = '';
-      setTimeout(() => {
-        passwordInput.focus();
-      }, 50);
-      
-      // Show specific hint after multiple wrong attempts
-      if (wrongAttempts >= 3) {
-        passwordError.querySelector('small').textContent = '💡 Hint: It\'s a 4-digit number starting with 10';
-      }
-    }
-  }
-  
-  // ============================================
-  // EVENT LISTENERS
-  // ============================================
-  
-  // Handle button click (for both click and touch)
-  submitPassword.addEventListener('click', checkPassword);
-  
-  // Handle Enter key press
-  passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      checkPassword();
-    }
-  });
-  
-  // Handle touch events on mobile
-  submitPassword.addEventListener('touchend', function(e) {
-    e.preventDefault();
-    checkPassword();
-  });
-  
-  // Prevent form submission on Enter in input
-  passwordInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      checkPassword();
-    }
-  });
-  
-  // ============================================
-  // ORIGINAL VALENTINE PAGE CODE
-  // ============================================
-  const zone = document.getElementById("zone");
-  const yesBtn = document.getElementById("yesBtn");
-  const noBtn = document.getElementById("noBtn");
-  const result = document.getElementById("result");
-  const hint = document.getElementById("hint");
-  const confettiCanvas = document.getElementById("confettiCanvas");
+};
 
-  function resizeCanvas() {
-    const dpr = window.devicePixelRatio || 1;
-    confettiCanvas.width = innerWidth * dpr;
-    confettiCanvas.height = innerHeight * dpr;
-  }
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-
-  const confettiInstance = confetti.create(confettiCanvas, { useWorker: true });
-
-  function celebrate() {
-    confettiInstance({
-      particleCount: 300,
-      spread: 160,
-      startVelocity: 55,
-      origin: { x: 0.5, y: 0.6 }
-    });
-  }
-
-  let scale = 1;
-  function growYes() {
-    scale = Math.min(2.2, scale + 0.12);
-    yesBtn.style.transform = `translateY(-50%) scale(${scale})`;
-  }
-
-  function moveNo(x, y) {
-    const z = zone.getBoundingClientRect();
-    const b = noBtn.getBoundingClientRect();
-
-    let dx = (b.left + b.width / 2) - x;
-    let dy = (b.top + b.height / 2) - y;
-    let mag = Math.hypot(dx, dy) || 1;
-
-    let left = (b.left - z.left) + (dx / mag) * 120;
-    let top  = (b.top - z.top) + (dy / mag) * 120;
-
-    noBtn.style.left = Math.max(0, Math.min(z.width - b.width, left)) + "px";
-    noBtn.style.top  = Math.max(0, Math.min(z.height - b.height, top)) + "px";
-
-    growYes();
-  }
-
-  function handleMove(x, y) {
-    const b = noBtn.getBoundingClientRect();
-    const d = Math.hypot(
-      (b.left + b.width / 2) - x,
-      (b.top + b.height / 2) - y
-    );
-    if (d < 140) moveNo(x, y);
-  }
-
-  // Mouse/touch events for the "No" button
-  zone.addEventListener("pointermove", e => {
-    handleMove(e.clientX, e.clientY);
-  });
-  
-  zone.addEventListener("touchmove", e => {
-    if (e.touches.length > 0) {
-      const touch = e.touches[0];
-      handleMove(touch.clientX, touch.clientY);
-    }
-  });
-
-  noBtn.onclick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    moveNo(e.clientX, e.clientY);
-  };
-  
-  noBtn.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    if (e.changedTouches.length > 0) {
-      const touch = e.changedTouches[0];
-      moveNo(touch.clientX, touch.clientY);
-    }
-  });
-
-  yesBtn.onclick = () => {
-    zone.style.display = "none";
-    hint.style.display = "none";
-    result.style.display = "block";
-    celebrate();
-  };
-  
-  yesBtn.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    zone.style.display = "none";
-    hint.style.display = "none";
-    result.style.display = "block";
-    celebrate();
-  });
-  
-  // ============================================
-  // INITIALIZE EVERYTHING
-  // ============================================
-  document.addEventListener('DOMContentLoaded', initializePasswordProtection);
-  
-  // Re-focus input when page becomes visible again
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && 
-        passwordOverlay.style.display !== 'none' && 
-        sessionStorage.getItem('valentineUnlocked') !== 'true') {
-      setTimeout(() => passwordInput.focus(), 100);
-    }
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('valentineUnlocked') === 'true') unlock();
+});
 </script>
 
 </body>
