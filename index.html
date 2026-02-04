@@ -161,12 +161,12 @@
       padding: 16px;
       border: 2px solid #ffb8d9;
       border-radius: 12px;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       text-align: center;
       background: #fff9fc;
       box-sizing: border-box;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       transition: all 0.3s ease;
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -181,22 +181,24 @@
 
     .password-submit {
       width: 100%;
-      padding: 16px;
+      padding: 14px;
       background: linear-gradient(135deg, #ff3b7a, #ff6b9d);
       color: white;
       border: none;
       border-radius: 12px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      margin-bottom: 15px;
-      transition: transform 0.2s;
-      box-shadow: 0 6px 20px rgba(255, 59, 122, 0.3);
+      transition: transform 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 15px rgba(255, 59, 122, 0.3);
       -webkit-tap-highlight-color: transparent;
+      margin: 0 auto;
+      display: block;
     }
 
     .password-submit:active {
       transform: scale(0.98);
+      opacity: 0.9;
     }
 
     .password-error {
@@ -204,7 +206,7 @@
       border: 1px solid #ff3b7a;
       border-radius: 10px;
       padding: 12px;
-      margin-top: 16px;
+      margin-top: 12px;
       display: none;
       animation: pop 0.3s ease;
     }
@@ -231,17 +233,17 @@
       <path fill="#ff3b7a" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
     </svg>
     
-    <h2 style="margin-bottom: 8px;">💖 Secret Message for You 💖</h2>
-    <p style="margin-bottom: 20px; opacity: 0.8; font-size: 15px;">
-      Enter our special code to continue:
+    <h2 style="margin-bottom: 8px; font-size: 24px;">💖 Secret Message 💖</h2>
+    <p style="margin-bottom: 15px; opacity: 0.8; font-size: 15px; line-height: 1.4;">
+      This message is just for you<br>
+      Enter the special code to continue
     </p>
     
-    <div style="position: relative; margin-bottom: 20px;">
+    <div style="position: relative; margin-bottom: 15px;">
       <input type="text" 
              id="passwordInput" 
-             maxlength="6"
              class="password-input"
-             placeholder="Enter code..."
+             placeholder="Enter password..."
              autocomplete="off"
              autocapitalize="none"
              autocorrect="off"
@@ -250,22 +252,16 @@
     </div>
     
     <button id="submitPassword" class="password-submit">
-      Open My Heart 💕
+      Unlock the Message 🔓
     </button>
     
     <div id="passwordError" class="password-error">
       <p style="margin: 0; color: #ff3b7a; font-size: 14px; text-align: center;">
         <span style="font-size: 18px;">❌</span><br>
-        Not quite right! Try again.<br>
+        That's not the right code<br>
         <small style="opacity: 0.7; margin-top: 5px; display: block;">
-          💡 Hint: A number that means "you and me forever"
+          💡 Hint: It's the number I use the most on my phone
         </small>
-      </p>
-    </div>
-    
-    <div id="extraHint" class="extra-hint">
-      <p style="margin: 0; font-size: 13px; opacity: 0.8; text-align: center;">
-        Still stuck? Try: <strong>love</strong> or <strong>yes</strong> or <strong>1009</strong>
       </p>
     </div>
   </div>
@@ -336,7 +332,6 @@
   const passwordInput = document.getElementById('passwordInput');
   const submitPassword = document.getElementById('submitPassword');
   const passwordError = document.getElementById('passwordError');
-  const extraHint = document.getElementById('extraHint');
   const mainCard = document.querySelector('.card');
   
   let wrongAttempts = 0;
@@ -357,33 +352,27 @@
       return;
     }
     
+    // Show password overlay
+    passwordOverlay.style.display = 'flex';
+    
     // Focus on input after a short delay
     setTimeout(() => {
       passwordInput.focus();
-    }, 500);
+    }, 300);
   }
   
   // ============================================
-  // OBFUSCATED PASSWORD CHECK
+  // PASSWORD CHECK FUNCTION
   // ============================================
   function isPasswordCorrect(input) {
-    const cleanInput = input.toLowerCase().trim();
+    const cleanInput = input.trim();
     
-    // Multiple obfuscated ways to check for 1009
-    const encodedPass = atob("MTAwOQ=="); // Base64 for "1009"
-    const mathPass = (1000 + 9).toString();
-    const arrayPass = ['10', '0', '9'].join('');
-    const charCodePass = String.fromCharCode(49, 48, 48, 57);
-    
-    // Check all possible correct inputs
-    if (cleanInput === "1009" ||
-        cleanInput === encodedPass ||
-        cleanInput === mathPass ||
-        cleanInput === arrayPass ||
-        cleanInput === charCodePass ||
-        cleanInput === "love" ||
-        cleanInput === "yes" ||
-        cleanInput === "forever") {
+    // Accept multiple formats of the same number
+    if (cleanInput === "1009" || 
+        cleanInput === "10-09" || 
+        cleanInput === "10/09" ||
+        cleanInput === "1009❤️" ||
+        cleanInput === "10.09") {
       return true;
     }
     
@@ -400,8 +389,8 @@
     // Small confetti for success
     if (window.confetti) {
       confettiInstance({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 80,
+        spread: 60,
         origin: { x: 0.5, y: 0.5 }
       });
     }
@@ -418,14 +407,11 @@
     // Remove overlay after animation
     setTimeout(() => {
       passwordOverlay.style.display = 'none';
-      
-      // Re-focus on page for accessibility
-      mainCard.focus();
-    }, 800);
+    }, 500);
   }
   
   // ============================================
-  // PASSWORD EVENT HANDLERS
+  // PASSWORD SUBMIT FUNCTION
   // ============================================
   function checkPassword() {
     const userInput = passwordInput.value;
@@ -446,48 +432,44 @@
         passwordInput.style.animation = 'shake 0.5s';
       }, 10);
       
-      // Clear input
+      // Clear input and refocus
       passwordInput.value = '';
-      passwordInput.focus();
+      setTimeout(() => {
+        passwordInput.focus();
+      }, 50);
       
-      // Show extra hint after 2 wrong attempts
-      if (wrongAttempts >= 2) {
-        extraHint.style.display = 'block';
-      }
-      
-      // Show partial hint after 3 wrong attempts
+      // Show specific hint after multiple wrong attempts
       if (wrongAttempts >= 3) {
-        passwordInput.placeholder = "1 0 0 _";
+        passwordError.querySelector('small').textContent = '💡 Hint: It\'s a 4-digit number starting with 10';
       }
     }
   }
   
   // ============================================
-  // MOBILE-FRIENDLY EVENT LISTENERS
+  // EVENT LISTENERS
   // ============================================
   
-  // Handle button click
+  // Handle button click (for both click and touch)
   submitPassword.addEventListener('click', checkPassword);
-  submitPassword.addEventListener('touchend', function(e) {
-    e.preventDefault(); // Prevent double tap zoom on mobile
-    checkPassword();
-  });
   
-  // Handle Enter key
+  // Handle Enter key press
   passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       checkPassword();
     }
   });
   
-  // Handle virtual keyboard on mobile
-  passwordInput.addEventListener('input', function(e) {
-    // Auto-submit when 4 characters are entered (for "1009")
-    if (this.value.length === 4) {
-      // Small delay to allow user to see what they typed
-      setTimeout(() => {
-        checkPassword();
-      }, 300);
+  // Handle touch events on mobile
+  submitPassword.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    checkPassword();
+  });
+  
+  // Prevent form submission on Enter in input
+  passwordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      checkPassword();
     }
   });
   
@@ -552,29 +534,30 @@
     if (d < 140) moveNo(x, y);
   }
 
-  // Mobile touch support for the "No" button
+  // Mouse/touch events for the "No" button
   zone.addEventListener("pointermove", e => {
     handleMove(e.clientX, e.clientY);
   });
   
-  // Touch events for mobile
   zone.addEventListener("touchmove", e => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleMove(touch.clientX, touch.clientY);
-  }, { passive: false });
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleMove(touch.clientX, touch.clientY);
+    }
+  });
 
   noBtn.onclick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    moveNo(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    moveNo(e.clientX, e.clientY);
   };
   
-  // Touch event for mobile
   noBtn.addEventListener("touchend", (e) => {
     e.preventDefault();
-    const touch = e.changedTouches[0];
-    moveNo(touch.clientX, touch.clientY);
+    if (e.changedTouches.length > 0) {
+      const touch = e.changedTouches[0];
+      moveNo(touch.clientX, touch.clientY);
+    }
   });
 
   yesBtn.onclick = () => {
@@ -584,7 +567,6 @@
     celebrate();
   };
   
-  // Touch event for mobile
   yesBtn.addEventListener("touchend", (e) => {
     e.preventDefault();
     zone.style.display = "none";
@@ -596,12 +578,14 @@
   // ============================================
   // INITIALIZE EVERYTHING
   // ============================================
-  window.addEventListener('DOMContentLoaded', initializePasswordProtection);
+  document.addEventListener('DOMContentLoaded', initializePasswordProtection);
   
-  // Handle page visibility changes (for mobile)
+  // Re-focus input when page becomes visible again
   document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && sessionStorage.getItem('valentineUnlocked') !== 'true') {
-      passwordInput.focus();
+    if (!document.hidden && 
+        passwordOverlay.style.display !== 'none' && 
+        sessionStorage.getItem('valentineUnlocked') !== 'true') {
+      setTimeout(() => passwordInput.focus(), 100);
     }
   });
 </script>
