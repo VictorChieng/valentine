@@ -90,6 +90,7 @@
       left: 60%;
       background: #e5e7eb;
       color: #111827;
+      z-index: 10;
     }
 
     .hint {
@@ -167,7 +168,7 @@
     <button id="noBtn">No 😶</button>
   </section>
 
-  <div class="hint" id="hint">The “No” button is feeling shy 🙈</div>
+  <div class="hint" id="hint">The "No" button is feeling shy 🙈</div>
 
   <section class="result" id="result">
     <h2>YAY!! 🎉💘</h2>
@@ -251,6 +252,12 @@
     handleMove(e.clientX, e.clientY);
   });
 
+  noBtn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+
   yesBtn.onclick = () => {
     zone.style.display = "none";
     hint.style.display = "none";
@@ -261,4 +268,3 @@
 
 </body>
 </html>
-
